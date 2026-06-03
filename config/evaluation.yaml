@@ -1,0 +1,7 @@
+models:
+  judge_model: gemini-3.5-flash
+  desc_model: gemini-3.5-flash
+
+path:
+  dataset_path: evaluation/input/RAG_evaluation_dataset.csv
+  output_path: evaluation/results/multimodal_inline_3000_seo.csv

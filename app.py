@@ -1,5 +1,7 @@
 import streamlit as st
-from src.utils.tools import load_yaml
+import os
+os.environ["TRANSFORMERS_VERBOSITY"] = "error"
+
 from src.orchestrator import main
 
 st.title("IFC Analyst Assistant")

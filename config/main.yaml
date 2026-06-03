@@ -1,0 +1,19 @@
+models:
+  main_model: gemini-3.5-flash
+  embedding_model: text-embedding-005
+  judge_model: gemini-3.5-flash
+  desc_model: gemini-3.5-flash
+
+retriever:
+  top_k: 20
+  distance_treshold: 0.3
+
+vector_db:
+  knowladge_path: knowledge/ifc-annual-report-2024-financials.pdf
+  db_path: ./chroma_databases/multimodal_inline_3000_sep
+  chunk_approach: multimodal_inline      # baseline / multimodal_inline / multimodal_split
+  elements_blacklist: []          # e.g. ["Image", "Table"] (Only for multimodal apporaches!)
+  chunk_size: 3000
+  chunk_overlap: 500
+  similarity_metric: "cosine"
+

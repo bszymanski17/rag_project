@@ -1,10 +1,10 @@
-from src.generation.generator import generate_data
-from src.retrieval.retrieval_engine import run_retrieval
-from src.utils.tools import load_yaml
-from src.db_handler.db_orchestrator import initialize_database
-from typing import Iterator
+from src.utils.load_settings import load_yaml, create_logger
+from src.indexing.database_orchestrator import initialize_database
+from src.retrieval.retrieval_engine import retrieval_content
+from src.generation.answer_generator import generate_streamed_response
 
-config = load_yaml("config/config.yaml")
+config = load_yaml("config/main.yaml")
+logger = create_logger("Orchestrator")
 
 def main(user_prompt: str, evaluation_mode: bool = False):
     """
@@ -16,21 +16,15 @@ def main(user_prompt: str, evaluation_mode: bool = False):
     Returns:
         Iterator[str]: A stream generator yielding partial text chunks of the
     """
-    initialize_database()
+    if not initialize_database():
+        logger.error("Database initialization failed. The RAG pipeline cannot proceed.")
+        raise RuntimeError("Database initialization failed. The RAG pipeline cannot proceed.")
 
-    context, raw_chunks, score = run_retrieval(user_prompt, config["models"]["embedding_model"], config["vector_db"]["db_path"], config["retriever"]["top_k"], config["retriever"]["distance_treshold"])
+    context, raw_chunks, score = retrieval_content(user_prompt, config["models"]["embedding_model"], config["vector_db"]["db_path"], config["retriever"]["top_k"], config["retriever"]["distance_treshold"])
    
     if evaluation_mode:
-        return generate_data(context, user_prompt, config['models']['main_model']), raw_chunks
+        return generate_streamed_response(context, user_prompt, config['models']['main_model']), raw_chunks
     
-    return generate_data(context, user_prompt, config['models']['main_model'])
+    return generate_streamed_response(context, user_prompt, config['models']['main_model'])
 
-import time
-if __name__ == "__main__":
-    generator = main("What was the predominant currency in IFC's disbursed loxan portfolio as of June 30, 2024, and what was its value??")
-    
-    print("Rozpoczynam strumieniowanie:")
-    for chunk in generator:
-        print(chunk, end="", flush=True)
-        time.sleep(0.05) # minimalne opóźnienie, byś lepiej widział czy leci po kawałku
-    print("\nKoniec.")
+
