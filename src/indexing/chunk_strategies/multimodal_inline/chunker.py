@@ -5,7 +5,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.indexing.element_describer import generate_description
 from src.utils.load_settings import create_logger, load_yaml
-from src.indexing.table_transformer import html_to_markdown
 
 logger = create_logger("Chunking document")
 config = load_yaml("config/main.yaml")

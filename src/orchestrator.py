@@ -1,6 +1,6 @@
 from src.utils.load_settings import load_yaml, create_logger
 from src.indexing.database_orchestrator import initialize_database
-from src.retrieval.retrieval_engine import retrieval_content
+from src.retrieval.retrieval_orchestrator import retrieval_content
 from src.generation.answer_generator import generate_streamed_response
 
 config = load_yaml("config/main.yaml")

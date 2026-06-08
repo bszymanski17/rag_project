@@ -6,12 +6,12 @@ models:
   metadata_model: gemini-2.5-fash
 
 retriever:
-  top_k: 60
+  top_k: 20
   distance_treshold: 0.3
 
 vector_db:
   knowladge_path: knowledge/ifc-annual-report-2024-financials.pdf
-  db_path: ./chroma_databases/multimodal_inline_3000_metadata_reranker_20_md
+  db_path: ./chroma_databases/multimodal_inline_3000_metadata_test
   chunk_approach: multimodal_inline      # baseline / multimodal_inline / multimodal_inline_metadata / multimodal_split
   elements_blacklist: []          # e.g. ["Image", "Table"] (Only for multimodal apporaches!)
   chunk_size: 3000
@@ -19,6 +19,6 @@ vector_db:
   similarity_metric: "cosine"
 
 reranker:
-  use_reranker: True        # True/False
+  use_reranker: False        # True/False
   top_n: 20
 

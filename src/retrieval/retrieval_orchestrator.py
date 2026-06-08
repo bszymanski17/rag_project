@@ -52,7 +52,7 @@ def retrieval_content(user_query: str, emb_model: str, db_path: str, retriever_t
     if config["reranker"]["use_reranker"]:
         valid_docs, raw_chunks, similarity_scores = rerank_chunks(user_query=user_query, docs_with_scores=docs_with_scores, config=config, reranker=reranker)
     else:
-        valid_docs, raw_chunks, similarity_scores = filter_chunks_by_threshold(docs_with_scores=docs_with_scores, distance_threshold=config["distance_treshold"]["distance_treshold"])
+        valid_docs, raw_chunks, similarity_scores = filter_chunks_by_threshold(docs_with_scores=docs_with_scores, distance_threshold=config["retriever"]["distance_treshold"])
         
     if config["vector_db"]["chunk_approach"] == "multimodal_inline_metadata":
         return format_documents_to_context_with_page_number(valid_docs, similarity_scores), raw_chunks, similarity_scores
