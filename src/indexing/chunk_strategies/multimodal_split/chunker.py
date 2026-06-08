@@ -28,7 +28,7 @@ def chunk_pdf(pdf_path: str, blacklist: list):
     logger.info("Loading document...")
 
     from langchain_community.document_loaders import UnstructuredPDFLoader
-    image_dir = ("images/extracted_images" if "Image" not in blacklist else None)
+    image_dir = ("images" if "Image" not in blacklist else None)
     if image_dir:
         os.makedirs(image_dir, exist_ok=True)
 

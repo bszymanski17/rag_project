@@ -1,4 +1,6 @@
 # 1. Approaches
+Across first 2 approaches, text chunking was performed using a chunk_size of 1000 and a chunk_overlap of 200 (except experiments in approach 3) and the retrieval phase involved fetching the top 20 chunks using the cosine distance metric, and then retaining only those chunks with a distance score below 0.3.
+
 # 1.1 Baseline
 This strategy utilizes a traditional, text-only approach where the PDF content is extracted page-by-page as a continuous stream of text using PyMuPDFLoader. The raw text is then sequentially divided into smaller segments using the RecursiveCharacterTextSplitter based strictly on predefined character limits and overlaps. It treats all content uniformly without identifying or preserving complex structural elements like tables or images.
 
