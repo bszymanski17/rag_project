@@ -64,6 +64,9 @@ Additionally, enhancements such as rerankers and the integration of metadata (pa
 │   │   └── element_describer.py     # Communication engine with LLM for generating text descriptions of visual elements
 │   ├── retrieval/                   # Context fetcher and ranking engine
 │   │   ├── context_formatter.py     # Formats retrieved chunks into a solid prompt context block
+│   │   ├── query_metadata_extractor.py # Leverages a structured LLM to extract page-level metadata constraints
+│   │   ├── reranker.py              # Executes a Cross-Encoder deep relevance evaluation to re-rank candidate chunks
+│   │   ├── retrieval_filter.py      # Filters retrieved chunks based on semantic distance thresholds
 │   │   └── retrieval_engine.py      # Handles initial Vector DB retrieval and orchestrates the retrieval part
 │   ├── utils/                       # Shared utility functions
 │   │   ├── image_utils.py           # Image operations 
