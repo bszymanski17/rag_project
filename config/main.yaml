@@ -17,7 +17,6 @@ vector_db:
   chunk_size: 3000
   chunk_overlap: 500
   similarity_metric: "cosine"
-  table_transformation: markdown    # llm_description / markdown
 
 reranker:
   use_reranker: True        # True/False

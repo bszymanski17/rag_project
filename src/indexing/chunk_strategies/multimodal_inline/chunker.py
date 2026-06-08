@@ -56,21 +56,10 @@ def chunk_pdf(pdf_path: str, blacklist: list) -> list:
         page_num = doc.metadata.get("page_number", "Unknown")
         
         if category == "Table":
-            logger.info("Transoming table...")
-            if config["vector_db"]["table_transformation"] == "llm_description":
-                table_content = generate_description(element_type="Table", element_content=doc.page_content)
-            else:
-                html_table = doc.metadata.get("text_as_html")
-                if html_table:
-                    logger.info("Mardown found")
-                    table_content = html_to_markdown(html_table)
-
-                else:
-                    logger.info("No found")
-                    table_content = doc.page_content
+            desc = generate_description(element_type="Table", element_content=doc.page_content)
             full_enriched_text += (
                 f"\n\n[START OF TABLE - LOCATION: Page {page_num}]\n"
-                f"{table_content}\n"
+                f"{desc}\n"
                 f"[END OF TABLE]\n\n"
             )
             
