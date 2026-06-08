@@ -4,4 +4,4 @@ models:
 
 path:
   dataset_path: evaluation/input/RAG_evaluation_dataset.csv
-  output_path: evaluation/results/multimodal_inline_3000_seo.csv
+  output_path: evaluation/results/multimodal_inline_3000_metadata_reranker_20_md.csv

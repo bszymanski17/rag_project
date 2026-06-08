@@ -114,8 +114,11 @@ While this strategy yielded solid performance, some missing answers were directl
 
 As chunk_size increases, the results consistently improve. It appears that chunk_size = 3000 is the optimal choice, striking a balance between effectiveness and efficiency. In this scenario, we observe an increase in answer correctness of over 20% compared to the model with chunk_size = 1000. In only one instance did the model respond that it did not know the answer. For all other questions, it provided either correct or partially correct answers. Further expanding the context window continues to improve performance, but the rate of growth slows down.
 
+# 1.4 Multimodal inline with modified separators"
 To improve model performance, a different set of separators was also tested to achieve a more logical text split:
 - ["\n\n", "\n", " ", ""]    -> ["\n\n\n","\n\n",". ",".\n","? ","! "," ",""]
+
+In this approach, the chunk_size was set to 3000.
 
 | Category | Faithfulness | Answer Correctness | Context Recall |
 | :--- | :---: | :---: | :---: |
@@ -125,6 +128,51 @@ To improve model performance, a different set of separators was also tested to a
 | **All** | 1.0000 | 0.8038 | 0.8529 |
 
 Compared to the previous set of separators with the same chunk_size value, we see an increase in Faithfulness and Context Recall at the cost of a slight decrease in Answer Correctness. Following this change, the model appears more reliable, delivering better and more logically segmented chunks, while the decline in answer correctness is negligible.
+
+## 1.5 Multimodal inline with metadata handling
+
+This approach addressing the critical limitation of location blindness inherent. By combining the sequential, enriched text stream from the inline multimodal strategy with explicit page-level metadata tagging and structured query routing, the system gains full spatial awareness of the document layout. In this approach, the separators from section 1.4 were applied.
+
+| Category | Faithfulness | Answer Correctness | Context Recall |
+| :--- | :--- | :--- | :--- |
+| text | 0.9000 | 0.8385 | 0.9000 |
+| image | 1.0000 | 0.6773 | 0.8333 |
+| table | 1.0000 | 0.9471 | 0.8889 |
+| all | 0.9412 | 0.8244 | 0.8529 |
+
+The results are highly robust compared to previous approaches. Furthermore, by leveraging metadata, we can scope our queries to content from specific pages or request the model to cite the exact page on which it based its answer.
+
+| Question | Answer |
+| :--- | :--- |
+| What does page 3 describe? | Page 3 contains the "Management’s Discussion and Analysis" section regarding the IFC 2024 financial report. |
+| What does page 4 contain? | Page 4 contains the introduction to the Management’s Discussion and Analysis discussing the IFC's financial results for the fiscal year ended June 30, 2024, as well as Table 1 containing Selected Financial Data. This table presents key investment indicators and a summary of operations for fiscal years 2022, 2023, and 2024 (including own-account commitments, fund mobilization, disbursements, net income or loss, and income available for designation), as well as selected balance sheet data as of June 30, 2023 and 2024 (total assets, liquid assets, investments, debt, and total capital). Furthermore, the page includes explanatory footnotes to the presented financial data and information about the Capital Utilization Ratio for the years 2023 and 2024. |
+| Tell me what charts are located from page 10 to 20? | The following charts are located on pages 10 to 20:<br>- **On page 15:** Figure 10: “Disbursed Investment Portfolio Distribution by Region”.<br>- **On page 17:** Figure 11: “Carrying Value of Loan Portfolio” and Figure 12: “Currency Composite of Disbursed Loan Portfolio”.<br>- **On page 18:** Figure 13: “Carrying Value of Equity Investment Portfolio” and Figure 14: “Carrying Value of Debt Security Portfolio”. |
+| What tables are located after page 130? | The following tables are located after page 130 in the provided text:<br>- **On page 139:** A table presenting Derivative Assets and Total Assets as of June 30, 2023, containing gross amounts reported in the consolidated balance sheet, financial instruments not subject to offsetting, collateral received, and net amounts.<br>- **On page 140:** A table presenting repurchase agreements for U.S. Treasury securities (Repurchase agreements - U.S. Treasury securities) and their total (Total Repurchase agreements) in millions of US dollars, broken down by maturity.<br>- **On page 144:** A table containing financial data for the Africa Region and the Central Asia and Türkiye Region broken down by country, including metrics such as Number of Enterprises, IFC, Loan & Guarantee Participations, and Total.<br>- **On page 145:** A table representing the Europe region, containing data for 17 countries (Albania, Armenia, Azerbaijan, Belarus, Bosnia and Herzegovina, Bulgaria, Croatia, Georgia, Kosovo, Moldova, Montenegro, North Macedonia, Poland, Romania, Russian Federation, Serbia, and Ukraine) regarding the number of enterprises, IFC, loan & guarantee participations, and total.<br>- **On page 146:** A table presenting worldwide investments (Worldwide) for individual countries and regional investments broken down by count (Count), value 1 (Value 1), value 2 (Value 2), and total value (Total Value). |
+| What tables are located before page 10? | Before page 10 of the report, there is Table 3: “Summary of Financial Results” located on page 9. |
+| What is the first row in the table on page 9? | There are two tables on page 9:<br>- **In Table 3 (Summary of Financial Results):** The first row (item) in the Consolidated Statement of Operations Highlights section is “Income from loans and guarantees, including realized gains and losses on loans and associated derivatives”.<br>- **In Table 4 (Key Financial Ratios):** The first row (item) is “Overall liquidity ratio (a)”. |
+|What is the stated mission of the International Finance Corporation? State which page you took the answer from.|The mission of the International Finance Corporation is to end extreme poverty and boost shared prosperity on a livable planet. This information is from page 5.|
+#
+
+## 1.6 reranker
+Another attempt to improve performance involves adding a reranker to Approach 1.5. The system first casts a wide net across the vector space to retrieve the top 50 candidate chunks using the embedding model. Subsequently, a computationally intensive Cross-Encoder performs deep cross-attention evaluation over all 50 query-chunk pairs, re-ranking them dynamically and pruning the final payload down to the top 10 most relevant chunks forwarded to the LLM.
+
+| Category | Faithfulness | Answer Correctness | Context Recall |
+| :--- | :--- | :--- | :--- |
+| text | 0.9833 | 0.8172 | 0.9000 |
+| image | 1.0000 | 0.6606 | 0.8333 |
+| table | 0.8889 | 0.7980 | 0.7778 |
+| all | 0.9620 | 0.7140 | 0.7794 |
+
+Replacing the previous filtering mechanism with a reranker led to a drop in performance. One potential cause could be an insufficient number of retrieved chunks; therefore, we will increase this value from 10 to 20.
+
+| Category | Faithfulness | Answer Correctness | Context Recall |
+| :--- | :--- | :--- | :--- |
+| text | 0.9500 | 0.8463 | 1.0000 |
+| image | 0.8333 | 0.5828 | 0.8333 |
+| table | 1.0000 | 0.8482 | 0.8889 |
+| all | 0.9242 | 0.7792 | 0.8676 |
+
+After increasing the number of retrieved chunks, we observe a significant boost in both Answer Correctness and Context Recall metrics; however, the results still fall short compared to the approach without a reranker.
 
 # 2. Chunking and retrieval parameters
 Across all approaches, text chunking was performed using a `chunk_size `of 1000 and a `chunk_overlap` of 200 (except experiments in approach 3) and the retrieval phase involved fetching the top 20 chunks using the cosine distance metric, and then retaining only those chunks with a distance score below 0.3.

@@ -29,3 +29,13 @@ desc_llm:
     {element_content}
   user_prompt_image: |
     Generate a search-optimized description for this image:
+
+extract_metadata:
+  system_prompt: |
+    You structure queries for a financial RAG system. Extract the core financial question into `clean_query` (removing all page/location references) and map page constraints:
+    - Range ("10-20"): start_page=10, end_page=20
+    - Single ("page 15"): start_page=15, end_page=15
+    - From ("after/from 10"): start_page=10, end_page=9999
+    - Up to ("until/first 20"): start_page=0, end_page=20
+  user_prompt : |
+    User query to process: {user_query}

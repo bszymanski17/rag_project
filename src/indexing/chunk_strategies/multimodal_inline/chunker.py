@@ -5,6 +5,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.indexing.element_describer import generate_description
 from src.utils.load_settings import create_logger, load_yaml
+from src.indexing.table_transformer import html_to_markdown
 
 logger = create_logger("Chunking document")
 config = load_yaml("config/main.yaml")
@@ -55,10 +56,21 @@ def chunk_pdf(pdf_path: str, blacklist: list) -> list:
         page_num = doc.metadata.get("page_number", "Unknown")
         
         if category == "Table":
-            desc = generate_description(element_type="Table", element_content=doc.page_content)
+            logger.info("Transoming table...")
+            if config["vector_db"]["table_transformation"] == "llm_description":
+                table_content = generate_description(element_type="Table", element_content=doc.page_content)
+            else:
+                html_table = doc.metadata.get("text_as_html")
+                if html_table:
+                    logger.info("Mardown found")
+                    table_content = html_to_markdown(html_table)
+
+                else:
+                    logger.info("No found")
+                    table_content = doc.page_content
             full_enriched_text += (
                 f"\n\n[START OF TABLE - LOCATION: Page {page_num}]\n"
-                f"{desc}\n"
+                f"{table_content}\n"
                 f"[END OF TABLE]\n\n"
             )
             
@@ -66,7 +78,7 @@ def chunk_pdf(pdf_path: str, blacklist: list) -> list:
             extracted_image_path = doc.metadata.get("image_path")
             desc = generate_description(element_type="Image", element_content=extracted_image_path)
             full_enriched_text += (
-                f"\n\n[START OF IMAGE/CHART - LOCATION: Page {page_num}]\n"
+                f"\n\n[START OF IMAGE - LOCATION: Page {page_num}]\n"
                 f"{desc}\n"
                 f"[END OF IMAGE/CHART]\n\n"
             )

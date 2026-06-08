@@ -30,6 +30,9 @@ def initialize_database() -> bool:
             elif config["vector_db"]["chunk_approach"] == "multimodal_inline":
                 from src.indexing.chunk_strategies.multimodal_inline.chunker import chunk_pdf
                 chunks = chunk_pdf(pdf_path=config["vector_db"]["knowladge_path"], blacklist=config["vector_db"]["elements_blacklist"])
+            elif config["vector_db"]["chunk_approach"] == "multimodal_inline_metadata":
+                from src.indexing.chunk_strategies.multimodal_inline.page_chunker import chunk_pdf
+                chunks = chunk_pdf(pdf_path=config["vector_db"]["knowladge_path"], blacklist=config["vector_db"]["elements_blacklist"])
             else:
                 logger.error("Invalid chunk approach.")
                 raise ValueError("Invalid chunk approach.")

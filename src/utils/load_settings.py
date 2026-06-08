@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pydantic import ValidationError
 
 from src.utils.logger_config import create_logger
-from src.schemas import GCPConfig, LFConfig
+from schemas.config_schemas import GCPConfig, LFConfig
 
 
 logger = create_logger("Loading yaml config")
