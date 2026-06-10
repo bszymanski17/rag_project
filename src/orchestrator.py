@@ -1,7 +1,7 @@
 from src.utils.load_settings import load_yaml, create_logger
 from src.indexing.database_orchestrator import initialize_database
 from src.retrieval.retrieval_orchestrator import retrieval_content
-from src.generation.answer_generator import generate_streamed_response
+from src.generation.answer_orchestrator import route_generation_stream
 
 config = load_yaml("config/main.yaml")
 logger = create_logger("Orchestrator")
@@ -23,8 +23,8 @@ def main(user_prompt: str, evaluation_mode: bool = False):
     context, raw_chunks, score = retrieval_content(user_prompt, config["models"]["embedding_model"], config["vector_db"]["db_path"], config["retriever"]["top_k"], config["retriever"]["distance_treshold"])
    
     if evaluation_mode:
-        return generate_streamed_response(context, user_prompt, config['models']['main_model']), raw_chunks
+        return route_generation_stream(context, user_prompt, config['models']['main_model']), raw_chunks
     
-    return generate_streamed_response(context, user_prompt, config['models']['main_model'])
+    return route_generation_stream(context, user_prompt, config['models']['main_model'])
 
 

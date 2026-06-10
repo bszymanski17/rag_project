@@ -43,12 +43,7 @@ def extract_query_metadata_filters(user_query: str, prompts: dict, config: dict)
 
     if parsed_filters.start_page and parsed_filters.end_page:
         logger.info(f"Applying page range filter: pages {parsed_filters.start_page} to {parsed_filters.end_page}")
-        return clean_query, {
-            "$and": [
-                {"page_number": {"$gte": int(parsed_filters.start_page)}},
-                {"page_number": {"$lte": int(parsed_filters.end_page)}}
-            ]
-        }
+        return clean_query, int(parsed_filters.start_page), int(parsed_filters.end_page)
     else:
         logger.info("No page constraints detected. Performing full database search.")
-        return user_query, None
+        return user_query, None, None
