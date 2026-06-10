@@ -4,4 +4,4 @@ models:
 
 path:
   dataset_path: evaluation/input/RAG_evaluation_dataset.csv
-  output_path: evaluation/results/multimodal_inline_3000_metadata_faiss.csv
+  output_path: evaluation/results/visual_multimodal.csv

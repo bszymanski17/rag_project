@@ -45,7 +45,6 @@ def retrieve_visual_content(user_query: str, retriever_top_k: int) -> tuple[str,
     for res in results:
         image_path = os.path.join(interim_images_dir, f"page_{res.doc_id}.jpg")
         
-
         raw_chunks.append(image_path)
         similarity_scores.append(float(res.score))
         

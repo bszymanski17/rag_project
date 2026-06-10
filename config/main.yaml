@@ -6,7 +6,7 @@ models:
   metadata_model: gemini-2.5-fash
 
 retriever:
-  top_k: 10
+  top_k: 15
   distance_treshold: 0.3
 
 vector_db:
