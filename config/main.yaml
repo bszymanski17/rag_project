@@ -7,16 +7,16 @@ models:
   visual_model: vidore/colqwen2-v1.0
 
 retriever:
-  top_k: 15
+  top_k: 60
   distance_treshold: 0.3
-  highlighted_regions: True # True / False
+  highlighted_regions: False # True / False
   highlighted_pages: 3
 
 
 vector_db:
   # paths
   knowladge_path: knowledge/ifc-annual-report-2024-financials.pdf
-  db_path: ./databases/chroma_databases/multimodal_visual
+  db_path: ./databases/chroma_databases/multimodal_inline_3000_metadata
   interim_images_dir: images/pages
 
   # parameters
@@ -25,13 +25,13 @@ vector_db:
   similarity_metric: "cosine"
 
   # approaches
-  chunk_approach: visual_multimodal                         # baseline / multimodal_inline / multimodal_inline_metadata / multimodal_split
+  chunk_approach: multimodal_inline                         # baseline / multimodal_inline / multimodal_inline_metadata / multimodal_split / visual_multimodal
   provider: chroma                                          # chroma / qdrant / faiss
   qdrant_collection_name: multimodal_inline_3000_metadata
   elements_blacklist: []                                    # e.g. ["Image", "Table"] (Only for multimodal apporaches!)
 
 
 reranker:
-  use_reranker: False                                       # True/False
-  top_n: 10
+  use_reranker: True                                       # True/False
+  top_n: 15
 

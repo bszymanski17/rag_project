@@ -46,7 +46,7 @@ if user_query:
                     with col:
                         st.caption(f"Page {page_num}")
                         try:
-                            img = get_highlighted_image(path, user_query, model, processor, device)
+                            img = get_highlighted_image(path, full_response, model, processor, device)
                             st.image(img, width='stretch')
                         except Exception as e:
                             st.image(Image.open(path), width='stretch')

@@ -2,7 +2,6 @@ import torch
 from PIL import Image, ImageDraw
 from colpali_engine.models import ColQwen2, ColQwen2Processor
 import streamlit as st
-import logging
 
 from src.utils.logger_config import create_logger
 
@@ -27,12 +26,12 @@ def load_colqwen2_model(model_name: str = "vidore/colqwen2-v1.0", device: str = 
     return model, processor
 
 
-def get_highlighted_image(image_path: str, query: str, model, processor, device: str = "mps") -> Image.Image:
-    """Generates a similarity heatmap overlay on an image based on a text query.
+def get_highlighted_image(image_path: str, answer: str, model, processor, device: str = "mps") -> Image.Image:
+    """Generates a similarity heatmap overlay on an image based on a text answer.
 
     Args:
         image_path (str): Path to the source image file.
-        query (str): Text query to visually locate on the image.
+        answer (str): Text answer to visually locate on the image.
         model: The loaded ColQwen2 model instance.
         processor: The associated model processor.
         device (str): Device to run the inference on.
@@ -44,7 +43,7 @@ def get_highlighted_image(image_path: str, query: str, model, processor, device:
     image = Image.open(image_path).convert("RGB")
 
     batch_images = processor.process_images([image]).to(device)
-    batch_queries = processor.process_queries([query]).to(device)
+    batch_queries = processor.process_queries([answer]).to(device)
 
     with torch.no_grad():
         image_embeddings = model(**batch_images)

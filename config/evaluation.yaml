@@ -3,5 +3,5 @@ models:
   desc_model: gemini-3.5-flash
 
 path:
-  dataset_path: evaluation/input/RAG_evaluation_dataset.csv
-  output_path: evaluation/results/visual_multimodal.csv
+  dataset_path: documents/evaluation/input/RAG_evaluation_dataset.csv
+  output_path: documents/evaluation/results/reranker_multimodal_3000_metadata_retry.csv

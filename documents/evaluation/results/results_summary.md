@@ -155,25 +155,17 @@ The results are highly robust compared to previous approaches. Furthermore, by l
 
 
 ## 1.6 Re-ranker
-Another attempt to improve performance involves adding a reranker to Approach 1.5. The system first casts a wide net across the vector space to retrieve the top 50 candidate chunks using the embedding model. Subsequently, a computationally intensive Cross-Encoder performs deep cross-attention evaluation over all 50 query-chunk pairs, re-ranking them dynamically and pruning the final payload down to the top 10 most relevant chunks forwarded to the LLM.
+Another attempt to improve performance involves adding a reranker to Approach 1.5. The system first casts a wide net across the vector space to retrieve the top 60 candidate chunks using the embedding model. Subsequently, a computationally intensive Cross-Encoder performs deep cross-attention evaluation over all 50 query-chunk pairs, re-ranking them dynamically and pruning the final payload down to the top 15 most relevant chunks forwarded to the LLM.
 
-| Category | Faithfulness | Answer Correctness | Context Recall |
+| category | faithfulness | answer correctness | context recall |
 | :--- | :--- | :--- | :--- |
-| text | 0.9833 | 0.8172 | 0.9000 |
-| image | 1.0000 | 0.6606 | 0.8333 |
-| table | 0.8889 | 0.7980 | 0.7778 |
-| all | 0.9620 | 0.7140 | 0.7794 |
+| **text** | 1.0000 | 0.8260 | 1.0000 |
+| **image** | 1.0000 | 0.6773 | 0.8333 |
+| **table** | 1.0000 | 0.9309 | 1.0000 |
+| **all** | 0.9853 | 0.7980 | 0.8971 |
 
-Replacing the previous filtering mechanism with a reranker led to a drop in performance. One potential cause could be an insufficient number of retrieved chunks; therefore, we will increase this value from 10 to 20.
+The reranker-based approach only failed in a single case out of 34, where the retrieved context did not contain the correct information and the model answered 'I don't know'. The metric values are somewhat skewed downward because certain responses were correct but failed to align with the key. In several numerical queries, the system was more accurate than the gold answer—for instance, providing an exact number instead of a rounded one—which triggered lower evaluations from the LLM-as-a-judge. In some cases, the context provided to the LLM confused the model because the answer to the question appeared twice—once as a rounded figure and once as a more precise value. As a result, the model was uncertain and returned dual responses such as: "In FY24, IFC's total disbursements, excluding guarantees, were $19.1 billion (or $19,147 million)." There are also cases among descriptive questions where the RAG output was valid but simply phrased differently than the reference answer.
 
-| Category | Faithfulness | Answer Correctness | Context Recall |
-| :--- | :--- | :--- | :--- |
-| text | 0.9500 | 0.8463 | 1.0000 |
-| image | 0.8333 | 0.5828 | 0.8333 |
-| table | 1.0000 | 0.8482 | 0.8889 |
-| all | 0.9242 | 0.7792 | 0.8676 |
-
-After increasing the number of retrieved chunks, we observe a significant boost in both Answer Correctness and Context Recall metrics; however, the results still fall short compared to the approach without a reranker.
 
 # 1.7 Visual approach
 This system implements a visual RAG pipeline where PDF pages are converted to high-resolution images and indexed using ColPali (ColQwen2), a late interaction multimodal model that generates patch-level embeddings to retrieve the most visually and semantically relevant pages. Retrieved pages are then passed as base64-encoded images directly to Gemini, which synthesizes the final answer from the visual context without any text extraction.
