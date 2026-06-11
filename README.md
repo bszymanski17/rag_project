@@ -24,11 +24,17 @@ Additionally, enhancements such as rerankers and the integration of metadata (pa
 
 ```
 .
-rag_project/
 ├── app.py                          # Streamlit chat interface
 ├── config/
-│   ├── evaluation.yaml             # Evaluation configuration
+│   ├── evaluation.yaml             # Evaluation configuration (paths, models)
 │   └── main.yaml                   # Main configuration (models, retriever, vector DB settings)
+├── documents/
+│   ├── analysis/            
+│   │   └── chunk_filtering_threshold_analysis.ipynb         
+│   └── evaluaton/
+│       ├── input/
+            └── RAG_evaluation_dataset.csv # evaluatuion dataset
+│       └── output/ # evaluaton results         
 ├── prompts/
 │   └── main.yaml                   # LLM prompt templates
 ├── knowledge/                      # Source PDF documents
@@ -37,7 +43,7 @@ rag_project/
 │   └── plots/             # Retrived plots from multimodal approach
 ├── schemas/
 │   ├── config_schemas.py           # Configuration validation schemas
-│   └── llm_output_schemas.py       # LLM output validation schemas
+│    └──llm_output_schemas.py       # LLM output validation schemas
 └── src/
     ├── orchestrator.py             # Main RAG pipeline orchestrator
     ├── indexing/
