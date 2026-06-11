@@ -174,3 +174,47 @@ Replacing the previous filtering mechanism with a reranker led to a drop in perf
 | all | 0.9242 | 0.7792 | 0.8676 |
 
 After increasing the number of retrieved chunks, we observe a significant boost in both Answer Correctness and Context Recall metrics; however, the results still fall short compared to the approach without a reranker.
+
+# 1.7 Visual approach
+This system implements a visual RAG pipeline where PDF pages are converted to high-resolution images and indexed using ColPali (ColQwen2), a late interaction multimodal model that generates patch-level embeddings to retrieve the most visually and semantically relevant pages. Retrieved pages are then passed as base64-encoded images directly to Gemini, which synthesizes the final answer from the visual context without any text extraction.
+
+| Category | Answer Correctness | Context Recall |
+| :--- | :---: | :---: |
+| **text** | 0.8521 | 1.0000 |
+| **image** | 0.7735 | 1.0000 |
+| **table** | 0.9760 | 1.0000 |
+| **all** | 0.8474 | 1.0000 |
+
+With 15 retrieved chunks (pages), context recall is 100% and answer correctness is at 84%, making it the best result among all approaches.
+
+# 2. Database comparison
+The next modifications evaluated involved changing the vector databases. All prior experiments were conducted using Chroma. In this section, we compare this approach (utilizing the architecture from Section 1.5) with the FAISS and Qdrant databases. The results are presented below
+# ChromaDB
+
+| Category | Faithfulness | Answer Correctness | Context Recall |
+| :--- | :--- | :--- | :--- |
+| text | 0.9000 | 0.8385 | 0.9000 |
+| image | 1.0000 | 0.6773 | 0.8333 |
+| table | 1.0000 | 0.9471 | 0.8889 |
+| all | 0.9412 | 0.8244 | 0.8529 |
+
+# Qdrant
+
+| Category | Faithfulness | Answer Correctness | Context Recall |
+| :--- | :--- | :--- | :--- |
+| **text** | 1.0000 | 0.7221 | 0.9000 |
+| **image** | 1.0000 | 0.6500 | 0.8333 |
+| **table** | 1.0000 | 0.9765 | 0.8889 |
+| **all** | 0.9706 | 0.7938 | 0.8529 |
+
+# FAISS
+
+| Category | Faithfulness | Answer Correctness | Context Recall |
+| :--- | :--- | :--- | :--- |
+| **text** | 0.8000 | 0.6762 | 0.7000 |
+| **image** | 0.8333 | 0.5587 | 0.5000 |
+| **table** | 1.0000 | 0.9762 | 0.8889 |
+| **all** | 0.8347 | 0.6806 | 0.6471 |
+
+#
+The most critical metric in this experiment is context recall, as it is responsible for the context retrieved from the database. We can observe that Chroma and Qdrant performed identically, with no differences visible in the results. Poorer performance was obtained when utilizing the FAISS database, where a clear decrease in context recall is observed for both text and images.

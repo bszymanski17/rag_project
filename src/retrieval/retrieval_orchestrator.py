@@ -9,8 +9,8 @@ from langchain_qdrant import QdrantVectorStore
 from src.utils.load_settings import load_env, create_logger, load_yaml
 from src.retrieval.context_formatter import format_documents_to_context, format_documents_to_context_with_page_number
 from src.retrieval.query_metada_extractor import extract_query_metadata_filters
-from src.retrieval.reranker import rerank_chunks
-from src.retrieval.retrieval_filter import filter_chunks_by_threshold
+from src.retrieval.chunk_filtering.reranker import rerank_chunks
+from src.retrieval.chunk_filtering.retrieval_filter import filter_chunks_by_threshold
 from src.retrieval.visual_retrieval import retrieve_visual_content
 
 

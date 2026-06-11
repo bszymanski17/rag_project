@@ -53,7 +53,7 @@ def generate_multimodal_streamed_response(context: str, question: str, model: st
                     b64_data = base64.b64encode(img_file.read()).decode("utf-8")
                 content.append({
                     "type": "image_url",
-                    "image_url": {"url": f"data:image/png;base64,{b64_data}"}
+                    "image_url": {"url": f"data:image/jpeg;base64,{b64_data}"}
                 })
             except FileNotFoundError:
                 logger.error(f"Context image not found at path: {path}")

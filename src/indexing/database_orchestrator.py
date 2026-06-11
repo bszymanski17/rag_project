@@ -42,9 +42,9 @@ def initialize_database() -> bool:
                 chunks = chunk_pdf(pdf_path=config["vector_db"]["knowladge_path"], blacklist=config["vector_db"]["elements_blacklist"])
             elif chunk_approach == "visual_multimodal":
                 from src.indexing.chunk_strategies.visual_processing.pdf_converter import convert_pdf_to_images
-                from src.indexing.image_database_initializer import create_image_vector_db
+                from src.indexing.visual_database_initializer import create_visual_vector_db
                 convert_pdf_to_images(pdf_path=config["vector_db"]["knowladge_path"], output_dir=config["vector_db"]["interim_images_dir"])
-                create_image_vector_db(images_dir=config["vector_db"]["interim_images_dir"], index_name=index_name)
+                create_visual_vector_db(images_dir=config["vector_db"]["interim_images_dir"], index_name=index_name)
                 
                 logger.info("Multimodal vector database created successfully via ColPali.")
                 return True

@@ -6,6 +6,15 @@ import streamlit as st
 
 @st.cache_resource
 def get_cached_multimodal_model(index_name: str, device: str) -> RAGMultiModalModel:
+    """Loads and caches a multimodal RAG model from a specified index.
+
+    Args:
+        index_name: Path or identifier of the pre-built index.
+        device: Device to load the model onto (e.g., "mps", "cuda").
+
+    Returns:
+        The initialized multimodal RAG model instance.
+    """
     logger.info(f"Loading ColPali model weights into {device} memory...")
     return RAGMultiModalModel.from_index(index_name, device=device)
 

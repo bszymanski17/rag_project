@@ -4,7 +4,7 @@ from src.utils.logger_config import create_logger
 
 # Importujemy oba niezależne komponenty generujące
 from src.generation.answer_generator import generate_streamed_response
-from src.generation.answer_generator_multimodal import generate_multimodal_streamed_response
+from src.generation.answer_generator_visual import generate_multimodal_streamed_response
 
 config = load_yaml("config/main.yaml")
 logger = create_logger("Answer Orchestrator")

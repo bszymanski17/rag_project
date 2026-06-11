@@ -4,24 +4,34 @@ models:
   judge_model: gemini-3.5-flash
   desc_model: gemini-3.5-flash
   metadata_model: gemini-2.5-fash
+  visual_model: vidore/colqwen2-v1.0
 
 retriever:
   top_k: 15
   distance_treshold: 0.3
+  highlighted_regions: True # True / False
+  highlighted_pages: 3
+
 
 vector_db:
+  # paths
   knowladge_path: knowledge/ifc-annual-report-2024-financials.pdf
-  db_path: ./chroma_databases/multimodal_visual
-  chunk_approach: visual_multimodal     # baseline / multimodal_inline / multimodal_inline_metadata / multimodal_split
-  elements_blacklist: []          # e.g. ["Image", "Table"] (Only for multimodal apporaches!)
+  db_path: ./databases/chroma_databases/multimodal_visual
+  interim_images_dir: images/pages
+
+  # parameters
   chunk_size: 3000
   chunk_overlap: 500
   similarity_metric: "cosine"
-  provider: chroma  # chroma / qdrant / faiss
+
+  # approaches
+  chunk_approach: visual_multimodal                         # baseline / multimodal_inline / multimodal_inline_metadata / multimodal_split
+  provider: chroma                                          # chroma / qdrant / faiss
   qdrant_collection_name: multimodal_inline_3000_metadata
-  interim_images_dir: data/interim_images
+  elements_blacklist: []                                    # e.g. ["Image", "Table"] (Only for multimodal apporaches!)
+
 
 reranker:
-  use_reranker: False       # True/False
+  use_reranker: False                                       # True/False
   top_n: 10
 

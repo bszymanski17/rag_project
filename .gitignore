@@ -3,11 +3,5 @@ __pycache__/
 .DS_Store
 .env
 .byaldi/
-chroma_db/
-faiss_db/
-data/interim_images/
-db_images/
 images/
-chroma_databases/
-faiss_databases/
-qdrant_databasees/
+databases/
