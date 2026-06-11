@@ -24,64 +24,57 @@ Additionally, enhancements such as rerankers and the integration of metadata (pa
 
 ```
 .
-├── analysis/
-│   └── chunk_analysis.ipynb         # Research notebook for testing thresholds for chunks
-├── chroma_databases/                 # Local directory containing persistent Chroma DB vector collections
+rag_project/
+├── app.py                          # Streamlit chat interface
 ├── config/
-│   ├── evaluation.yaml              # Configuration of evaluation pipeline
-│   └── main.yaml                    # Main system configuration
-├── evaluation/
-│   ├── input/
-│   │   └── RAG_evaluation_dataset.csv # Evaluation dataset containing questions, contexts, and ground truth answers
-│   └── results/                     # RAGAS evaluation outputs across different strategies
-│       ├── baseline/                # Test metrics for the raw text-only approach
-│       ├── multimodal_inline/       # Test metrics for the inline approach
-│       ├── multimodal_split/        # Test metrics for the isolated object descriptions approach
-│       └── results_summary.md       # Consolidated markdown file with comparative metrics across all runs
-├── images/                          # Target directory for graphics, charts, and tables extracted from the PDFs
-├── knowledge/
-│   └── ifc-annual-report-2024-financials.pdf # Source financial document acting as the RAG knowledge base
+│   ├── evaluation.yaml             # Evaluation configuration
+│   └── main.yaml                   # Main configuration (models, retriever, vector DB settings)
 ├── prompts/
-│   └── main.yaml                    # Prompt templates
+│   └── main.yaml                   # LLM prompt templates
+├── knowledge/                      # Source PDF documents
+├── images/
+│   ├── pages/             # PDF pages converted to images (visual pipeline)
+│   └── plots/             # Retrived plots from multimodal approach
 ├── schemas/
-│   ├── config_schemas.py            # Pydantic schemas for validating YAML configuration structures
-│   └── llm_output_schemas.py        # Pydantic definitions enforcing structured outputs from the LLM
-├── src/                             # Main application source code folder
-│   ├── evaluation/
-│   │   ├── __init__.py
-│   │   ├── eval_utils.py            # Helper functions for data aggregation and formatting
-│   │   └── evaluation_pipeline.py   # Executable pipeline that triggers a full evaluation run using RAGAS
-│   ├── generation/
-│   │   └── answer_generator.py      # Module handling prompt assembly and final answer generation from the LLM
-│   ├── indexing/                    # Core module handling document extraction, processing, and indexing
-│   │   ├── chunk_strategies/        # Concrete implementation of the three progressive chunking strategies
-│   │   │   ├── baseline/
-│   │   │   │   └── chunker.py       # Implements the simple text-splitting stream using PyMuPDF
-│   │   │   ├── multimodal_inline/
-│   │   │   │   ├── chunker.py       # Implements continuous stream stitching of enriched metadata and text
-│   │   │   │   └── page_chunker.py  # Advanced chunker that strictly obeys page boundaries and preserves location metadata
-│   │   │   └── multimodal_split/
-│   │   │       └── chunker.py       # Isolates table and image descriptions as standalone embedding chunks
-│   │   ├── database_initializer.py  # Script for safe collection creation, embedding function bindings, and resets
-│   │   ├── database_orchestrator.py # High-level coordinator managing chunk batch writes and metadata pushes to Chroma DB
-│   │   └── element_describer.py     # Communication engine with LLM for generating text descriptions of visual elements
-│   ├── retrieval/                   # Context fetcher and ranking engine
-│   │   ├── context_formatter.py     # Formats retrieved chunks into a solid prompt context block
-│   │   ├── query_metadata_extractor.py # Leverages a structured LLM to extract page-level metadata constraints
-│   │   ├── reranker.py              # Executes a Cross-Encoder deep relevance evaluation to re-rank candidate chunks
-│   │   ├── retrieval_filter.py      # Filters retrieved chunks based on semantic distance thresholds
-│   │   └── retrieval_engine.py      # Handles initial Vector DB retrieval and orchestrates the retrieval part
-│   ├── utils/                       # Shared utility functions
-│   │   ├── image_utils.py           # Image operations 
-│   │   ├── load_settings.py         # Handlers for robust loading of YAML configurations and environment variables
-│   │   └── logger_config.py         # Configures unified console logging formats and reporting levels
-│   ├── __init__.py
-│   └── orchestrator.py              # Main system engine bridging the Retrieval and Generation pipelines (the core RAG pipeline)
-├── .env                            
-├── .gitignore                       
-├── app.py                           # Application entry point script (UI interface)
-├── README.md                        
-└── requirements.txt                 
+│   ├── config_schemas.py           # Configuration validation schemas
+│   └── llm_output_schemas.py       # LLM output validation schemas
+└── src/
+    ├── orchestrator.py             # Main RAG pipeline orchestrator
+    ├── indexing/
+    │   ├── database_orchestrator.py          # Initializes vector DB (routes by chunk approach)
+    │   ├── database_initializer.py           # Chroma/Qdrant/FAISS DB creation
+    │   ├── visual_database_initializer.py    # ColPali index creation (visual pipeline)
+    │   ├── element_describer.py              # Multimodal element description via LLM
+    │   └── chunk_strategies/
+    │       ├── baseline/
+    │       │   └── chunker.py                # Basic text chunking
+    │       ├── multimodal_inline/
+    │       │   ├── chunker.py                # Multimodal chunking with inline elements
+    │       │   └── page_chunker.py           # Page-level chunking with metadata
+    │       ├── multimodal_split/
+    │       │   └── chunker.py                # Multimodal chunking with split elements
+    │       └── visual_processing/
+    │           └── pdf_converter.py          # PDF to image conversion
+    ├── retrieval/
+    │   ├── retrieval_orchestrator.py         # Routes retrieval by chunk approach
+    │   ├── visual_retrieval.py               # ColPali visual semantic search
+    │   ├── similarity_map.py                 # Source attribution heatmap generation
+    │   ├── context_formatter.py              # Formats retrieved chunks for LLM prompt
+    │   ├── query_metada_extractor.py         # Extracts page range filters from query
+    │   └── chunk_filtering/
+    │       ├── reranker.py                   # Cross-encoder reranking (BGE)
+    │       └── retrieval_filter.py           # Distance threshold filtering
+    ├── generation/
+    │   ├── answer_orchestrator.py            # Routes generation by chunk approach
+    │   ├── answer_generator.py               # Text-based Gemini response generation
+    │   └── answer_generator_visual.py        # Visual Gemini response (base64 images)
+    ├── evaluation/
+    │   ├── evaluation_pipeline.py            # End-to-end evaluation runner
+    │   └── eval_utils.py                     # RAGAS metrics utilities
+    └── utils/
+        ├── load_settings.py                  # YAML config and env loader
+        ├── logger_config.py                  # Logger setup
+        └── image_utils.py                    # Image processing helpers       
 ```
 
 ## Setup & Installation
