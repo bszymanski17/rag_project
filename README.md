@@ -15,6 +15,9 @@ The system architecture was developed and evaluated across three distinct progre
 3. **Multimodal Inline:**
    The current state-of-the-art strategy for this pipeline. It leverages the same high-resolution parsing and LLM description engine as the split approach. However, instead of isolating the summaries, the generated descriptions are stitched directly back into the continuous text stream in their original sequence. The text splitter is applied only after this full enrichment, preserving vital structural context and preventing location blindness.
 
+4. **Visual approach**
+   This system implements a visual RAG pipeline where PDF pages are converted to high-resolution images and indexed using ColPali (ColQwen2), a late interaction multimodal model that generates patch-level embeddings to retrieve the most visually and semantically relevant pages. Retrieved pages are then passed as base64-encoded images directly to Gemini, which synthesizes the final answer from the visual context without any text extraction.
+
 Additionally, enhancements such as rerankers and the integration of metadata (page numbers) were evaluated.
 
 ## Project Structure
@@ -116,23 +119,36 @@ models:
   judge_model: gemini-3.5-flash
   desc_model: gemini-3.5-flash
   metadata_model: gemini-2.5-fash
+  visual_model: vidore/colqwen2-v1.0
 
 retriever:
-  top_k: 60
+  top_k: 15
   distance_treshold: 0.3
+  highlighted_regions: True # True / False
+  highlighted_pages: 3
+
 
 vector_db:
+  # paths
   knowladge_path: knowledge/ifc-annual-report-2024-financials.pdf
-  db_path: ./chroma_databases/multimodal_inline_3000
-  chunk_approach: multimodal_inline      # baseline / multimodal_inline / multimodal_inline_metadata / multimodal_split
-  elements_blacklist: []          # e.g. ["Image", "Table"] (Only for multimodal apporaches!)
+  db_path: ./databases/chroma_databases/multimodal_visual
+  interim_images_dir: images/pages
+
+  # parameters
   chunk_size: 3000
   chunk_overlap: 500
   similarity_metric: "cosine"
 
+  # approaches
+  chunk_approach: visual_multimodal                         # baseline / multimodal_inline / multimodal_inline_metadata / multimodal_split
+  provider: chroma                                          # chroma / qdrant / faiss
+  qdrant_collection_name: multimodal_inline_3000_metadata
+  elements_blacklist: []                                    # e.g. ["Image", "Table"] (Only for multimodal apporaches!)
+
+
 reranker:
-  use_reranker: True        # True/False
-  top_n: 20
+  use_reranker: False                                       # True/False
+  top_n: 10
 
 ```
 
