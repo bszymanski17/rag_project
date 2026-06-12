@@ -15,10 +15,10 @@ def initialize_database() -> bool:
               False if an error occurred during the creation process.
     """
     chunk_approach = config["vector_db"]["chunk_approach"]
-    index_name = config["vector_db"]["qdrant_collection_name"]
+    index_name = config["vector_db"]["colpali_index_name"]
     byaldi_path = os.path.join(".byaldi", index_name)
 
-    if chunk_approach != "visual_multimodal" and os.path.exists(config["vector_db"]["db_path"]) and os.listdir(config["vector_db"]["db_path"]):
+    if chunk_approach not in ["visual_multimodal", "visual_database"] and os.path.exists(config["vector_db"]["db_path"]) and os.listdir(config["vector_db"]["db_path"]):
         logger.info("Vector database already exists.")
         return True
     elif chunk_approach == "visual_multimodal" and os.path.exists(byaldi_path):
@@ -42,12 +42,30 @@ def initialize_database() -> bool:
                 chunks = chunk_pdf(pdf_path=config["vector_db"]["knowladge_path"], blacklist=config["vector_db"]["elements_blacklist"])
             elif chunk_approach == "visual_multimodal":
                 from src.indexing.chunk_strategies.visual_processing.pdf_converter import convert_pdf_to_images
-                from src.indexing.visual_database_initializer import create_visual_vector_db
+                from src.indexing.visual_byaldi_initializer import create_visual_vector_db
                 convert_pdf_to_images(pdf_path=config["vector_db"]["knowladge_path"], output_dir=config["vector_db"]["interim_images_dir"])
                 create_visual_vector_db(images_dir=config["vector_db"]["interim_images_dir"], index_name=index_name)
-                
                 logger.info("Multimodal vector database created successfully via ColPali.")
                 return True
+            elif chunk_approach == "visual_database":
+                database_path = config["vector_db"]["db_path"]
+                
+                if os.path.exists(database_path) and os.listdir(database_path):
+                    logger.info("Strict multimodal vector database already exists.")
+                    return True
+                else:
+                    try:
+                        logger.info("Creating multimodal vector database...")
+                        from src.indexing.visual_database_initializer import build_strict_vector_db
+                        build_strict_vector_db(
+                            images_dir=config["vector_db"]["interim_images_dir"], 
+                            db_path=database_path
+                        )
+                        logger.info("Strict vector database created successfully.")
+                        return True
+                    except Exception as e:
+                        logger.error(f"Error during creating strict vector database: {str(e)}")
+                        return False
             else:
                 logger.error("Invalid chunk approach.")
                 raise ValueError("Invalid chunk approach.")

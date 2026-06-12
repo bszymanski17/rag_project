@@ -1,72 +1,92 @@
 import os
-from byaldi import RAGMultiModalModel
-from src.utils.load_settings import load_yaml, create_logger
 import torch
-import re
+import chromadb
+from PIL import Image
+from tqdm import tqdm
+from colpali_engine.models import ColQwen2, ColQwen2Processor
 
-logger = create_logger("Visual Database")
+from src.utils.load_settings import load_yaml
+from src.utils.logger_config import create_logger
+
+logger = create_logger("Strict Indexer")
 config = load_yaml("config/main.yaml")
 
-def create_visual_vector_db(images_dir: str, index_name: str = "colpali_index") -> RAGMultiModalModel:
-    """
-    Loads pre-rendered page images from a directory, generates multimodal 
-    embeddings using ColPali, and builds a late-interaction vector index.
-    
+
+def build_strict_vector_db(images_dir: str, db_path: str):
+    """Indexes image patches into database with explicit location metadata.
+
     Args:
-        images_dir: Path to the directory containing the page images.
-        index_name: Name of the folder where the resulting index will be saved.
-        
-    Returns:
-        The loaded and populated Byaldi RAG instance.
+        images_dir: Path to the directory containing page images.
+        db_path: Path where the database will be created.
     """
-    if not os.path.exists(images_dir) or not os.listdir(images_dir):
-        logger.error(f"Images directory '{images_dir}' is empty or does not exist!")
-        raise FileNotFoundError(f"No source images found in {images_dir}")
+    logger.info("Initializing database...")
+    client = chromadb.PersistentClient(path=db_path)
 
-    logger.info("Initiating Multimodal Vector DB creation using ColPali...")
+    try:
+        client.delete_collection("strict_patches")
+    except Exception:
+        pass
 
-    all_files = [os.path.join(images_dir, f) for f in os.listdir(images_dir) if f.endswith(".jpg")]
+    collection = client.create_collection("strict_patches", metadata={"hnsw:space": config["vector_db"]["similarity_metric"]})
 
-    sorted_image_paths = sorted(
-        all_files,
-        key=lambda x: int(re.search(r"page_(\d+)", os.path.basename(x)).group(1))
+    logger.info("Loading ColQwen2 model...")
+    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    processor = ColQwen2Processor.from_pretrained(config["models"]["visual_model"])
+    model = ColQwen2.from_pretrained(
+        config["models"]["visual_model"],
+        torch_dtype=torch.float32
+    ).to(device).eval()
+
+    image_files = sorted(
+        [f for f in os.listdir(images_dir) if f.endswith(".jpg")],
+        key=lambda x: int(x.split("_")[1].split(".")[0])
     )
 
-    doc_ids = [
-        int(re.search(r"page_(\d+)", os.path.basename(p)).group(1))
-        for p in sorted_image_paths
-    ]
+    for img_file in tqdm(image_files, desc="Indexing pages"):
+        page_num = int(img_file.split("_")[1].split(".")[0])
+        img_path = os.path.join(images_dir, img_file)
 
-    logger.info(f"Source images directory: '{images_dir}'")
-    logger.info(f"Target index name: '{index_name}'")
-    logger.info("Loading ColPali visual language model...")
+        image = Image.open(img_path).convert("RGB")
+        batch_images = processor.process_images([image]).to(device)
 
-    model_name = config["vector_db"]["visual_model"]
+        with torch.no_grad():
+            image_embeddings = model(**batch_images)
 
+        image_mask = processor.get_image_mask(batch_images)
+        patches = image_embeddings[0][image_mask[0]].cpu().numpy()  
 
-    if torch.backends.mps.is_available():
-        target_device = "mps"
-    else:
-        target_device = "cpu"
-
-    RAG = RAGMultiModalModel.from_pretrained(model_name, device=target_device)
-
-    logger.info("Generating multimodal multi-vector embeddings and filling the index...")
-
-    RAG.index(
-    input_path=sorted_image_paths[0],
-    index_name=index_name,
-    doc_ids=[doc_ids[0]],
-    store_collection_with_index=True,
-    overwrite=True
-)
-
-    for path, doc_id in zip(sorted_image_paths[1:], doc_ids[1:]):
-        RAG.add_to_index(
-            input_item=path,
-            store_collection_with_index=True,
-            doc_id=doc_id
+        spatial_merge_size = getattr(processor.image_processor, "merge_size", 2)
+        n_patches = processor.get_n_patches(
+            image_size=(image.size[0], image.size[1]),
+            spatial_merge_size=spatial_merge_size,
         )
+        n_x, n_y = n_patches
 
-    logger.info(f"Successfully populated multimodal vector database. Index saved to '.byaldi/{index_name}/'")
-    return RAG
+        ids = []
+        embeddings = []
+        metadatas = []
+
+        for patch_idx, patch_vec in enumerate(patches):
+            row = patch_idx // n_x
+            col = patch_idx % n_x
+            ids.append(f"page_{page_num}_patch_{patch_idx}")
+            embeddings.append(patch_vec.tolist())
+            metadatas.append({
+                "page_num": page_num,
+                "patch_index": patch_idx,
+                "patch_row": row,
+                "patch_col": col,
+                "n_patches_x": n_x,
+                "n_patches_y": n_y,
+                "image_path": img_path,
+            })
+
+        batch_size = 500
+        for i in range(0, len(ids), batch_size):
+            collection.add(
+                ids=ids[i:i + batch_size],
+                embeddings=embeddings[i:i + batch_size],
+                metadatas=metadatas[i:i + batch_size],
+            )
+
+    logger.info(f"Indexing complete. Saved to {db_path}")

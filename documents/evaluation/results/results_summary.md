@@ -157,7 +157,7 @@ The results are highly robust compared to previous approaches. Furthermore, by l
 ## 1.6 Re-ranker
 Another attempt to improve performance involves adding a reranker to Approach 1.5. The system first casts a wide net across the vector space to retrieve the top 60 candidate chunks using the embedding model. Subsequently, a computationally intensive Cross-Encoder performs deep cross-attention evaluation over all 50 query-chunk pairs, re-ranking them dynamically and pruning the final payload down to the top 15 most relevant chunks forwarded to the LLM.
 
-| category | faithfulness | answer correctness | context recall |
+| Category | Faithfulness | Answer correctness | Context recall |
 | :--- | :--- | :--- | :--- |
 | **text** | 1.0000 | 0.8260 | 1.0000 |
 | **image** | 1.0000 | 0.6773 | 0.8333 |
@@ -168,7 +168,7 @@ The reranker-based approach only failed in a single case out of 34, where the re
 
 
 # 1.7 Visual approach
-This system implements a visual RAG pipeline where PDF pages are converted to high-resolution images and indexed using ColPali (ColQwen2), a late interaction multimodal model that generates patch-level embeddings to retrieve the most visually and semantically relevant pages. Retrieved pages are then passed as base64-encoded images directly to Gemini, which synthesizes the final answer from the visual context without any text extraction.
+This approach implements a visual RAG pipeline where PDF pages are converted to high-resolution images and indexed using ColPali (ColQwen2) via the Byaldi library. Unlike text-based approaches, no text extraction is performed. Each page is embedded as a whole using late interaction multi-vector embeddings, where the model generates one vector per image patch. Retrieval is performed by computing MaxSim scores between query token embeddings and page patch embeddings, returning the most visually and semantically relevant pages. Retrieved pages are passed as base64-encoded images directly to Gemini, which synthesizes the final answer from the visual context.
 
 | Category | Answer Correctness | Context Recall |
 | :--- | :---: | :---: |
@@ -178,6 +178,16 @@ This system implements a visual RAG pipeline where PDF pages are converted to hi
 | **all** | 0.8474 | 1.0000 |
 
 With 15 retrieved chunks (pages), context recall is 100% and answer correctness is at 84%, making it the best result among all approaches.
+
+# 1.8 Visual database approach
+This approach extends the visual RAG pipeline by replacing Byaldi's in-memory index with ChromaDB as a persistent vector database. Instead of storing one embedding per page, each page is decomposed into individual patch embeddings which are stored separately in ChromaDB with explicit spatial metadata. Retrieval uses a two-stage MaxSim: first a fast approximate search in ChromaDB narrows down candidate pages, then exact Late Interaction scoring ranks them. 
+
+| Category | Answer correctness | Context recall |
+| :--- | :--- | :--- |
+| **Text** | 0.8405 | 1 |
+| **Image** | 0.7236 | 1 |
+| **Table** | 0.9762 | 1 |
+| **All** | 0.8266 | 1 |
 
 # 2. Database comparison
 The next modifications evaluated involved changing the vector databases. All prior experiments were conducted using Chroma. In this section, we compare this approach (utilizing the architecture from Section 1.5) with the FAISS and Qdrant databases. The results are presented below

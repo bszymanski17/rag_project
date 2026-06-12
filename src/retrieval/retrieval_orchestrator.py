@@ -44,6 +44,33 @@ def retrieval_content(user_query: str, emb_model: str, db_path: str, retriever_t
 
     if config["vector_db"]["chunk_approach"] == "visual_multimodal":
         return retrieve_visual_content(user_query=user_query, retriever_top_k=retriever_top_k)
+    
+    elif config["vector_db"]["chunk_approach"] == "visual_database":
+        from src.retrieval.visual_datagase_retrieval import retrieve_maxsim
+        from colpali_engine.models import ColQwen2, ColQwen2Processor
+        import torch
+        import streamlit as st
+
+        logger.info("Retrieving content using Strict MaxSim logic...")
+        device = "mps" if torch.backends.mps.is_available() else "cpu"
+        processor = ColQwen2Processor.from_pretrained("vidore/colqwen2-v1.0")
+        model = ColQwen2.from_pretrained("vidore/colqwen2-v1.0").to(device).eval()
+        
+        strict_db_path = config["vector_db"]["db_path"]
+        raw_chunks, best_patches_dict = retrieve_maxsim(
+            query=user_query, 
+            db_path=strict_db_path, 
+            model=model, 
+            processor=processor, 
+            device=device, 
+            top_k=config["retriever"]["top_k"]
+        )
+        import streamlit as st
+        st.session_state["strict_best_patches"] = best_patches_dict
+        context = "\n".join(raw_chunks)
+        score = [1.0] * len(raw_chunks)
+        
+        return context, raw_chunks, score
 
     provider = config["vector_db"]["provider"]
     embedding_model = GoogleGenerativeAIEmbeddings(model=emb_model, project=gcp_config.project_id, vertexai=True)

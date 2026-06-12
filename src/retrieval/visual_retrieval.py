@@ -36,7 +36,7 @@ def retrieve_visual_content(user_query: str, retriever_top_k: int) -> tuple[str,
     """
     logger.info("Performing multimodal retrieval using ColPali (Late Interaction)...")
     
-    index_name = config["vector_db"]["qdrant_collection_name"]
+    index_name = config["vector_db"]["colpali_index_name"]
     interim_images_dir = config["vector_db"]["interim_images_dir"]
 
     if torch.backends.mps.is_available():

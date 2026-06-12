@@ -22,7 +22,7 @@ def route_generation_stream(context: str, question: str, model: str) -> Iterator
     """
     chunk_approach = config["vector_db"]["chunk_approach"]
 
-    if chunk_approach == "visual_multimodal":
+    if chunk_approach in ["visual_multimodal", "visual_database"]:
         logger.info("Routing stream generation to Multimodal (Visual) engine.")
         return generate_multimodal_streamed_response(context=context, question=question, model=model)
     
