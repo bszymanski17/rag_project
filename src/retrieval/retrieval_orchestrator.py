@@ -46,7 +46,7 @@ def retrieval_content(user_query: str, emb_model: str, db_path: str, retriever_t
         return retrieve_visual_content(user_query=user_query, retriever_top_k=retriever_top_k)
     
     elif config["vector_db"]["chunk_approach"] == "visual_database":
-        from src.retrieval.visual_datagase_retrieval import retrieve_maxsim
+        from src.retrieval.visual_database_retrieval import retrieve_maxsim
         from colpali_engine.models import ColQwen2, ColQwen2Processor
         import torch
         import streamlit as st

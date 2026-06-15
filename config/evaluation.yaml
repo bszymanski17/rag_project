@@ -4,4 +4,4 @@ models:
 
 path:
   dataset_path: documents/evaluation/input/RAG_evaluation_dataset.csv
-  output_path: documents/evaluation/results/strict.csv
+  output_path: documents/visual_multimodal_mmrag.csv

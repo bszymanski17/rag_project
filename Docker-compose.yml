@@ -1,0 +1,13 @@
+services:
+  rag-app:
+    build: .
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./databases:/app/databases
+      - ./.byaldi:/app/.byaldi
+      - ./data/interim_images:/app/data/interim_images
+      - ./config:/app/config
+    restart: unless-stopped

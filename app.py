@@ -52,7 +52,7 @@ if user_query:
                             st.image(Image.open(path), width='stretch')
         elif config["vector_db"]["chunk_approach"] == "visual_database" and raw_chunks:
             from src.retrieval.bounding_boxes_generator import draw_bounding_boxes_from_metadata
-            from src.retrieval.visual_datagase_retrieval import rerank_patches_by_answer
+            from src.retrieval.visual_database_retrieval import rerank_patches_by_answer
             from src.retrieval.similarity_map_generator import load_colqwen2_model
 
             device = "mps" if torch.backends.mps.is_available() else "cpu"

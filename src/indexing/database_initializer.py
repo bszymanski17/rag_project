@@ -1,5 +1,5 @@
 from langchain_chroma import Chroma
-from langchain_community.vectorstores import Qdrant, FAISS
+from langchain_community.vectorstores import FAISS
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import time
 from langchain_qdrant import QdrantVectorStore

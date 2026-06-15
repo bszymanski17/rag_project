@@ -184,10 +184,11 @@ This approach extends the visual RAG pipeline by replacing Byaldi's in-memory in
 
 | Category | Answer correctness | Context recall |
 | :--- | :--- | :--- |
-| **Text** | 0.8405 | 1 |
-| **Image** | 0.7236 | 1 |
-| **Table** | 0.9762 | 1 |
-| **All** | 0.8266 | 1 |
+| **Text** | 0.8405 | 1.0000 |
+| **Image** | 0.7236 | 1.0000 |
+| **Table** | 0.9762 | 1.0000 |
+| **All** | 0.8266 | 1.0000 |
+#
 
 # 2. Database comparison
 The next modifications evaluated involved changing the vector databases. All prior experiments were conducted using Chroma. In this section, we compare this approach (utilizing the architecture from Section 1.5) with the FAISS and Qdrant databases. The results are presented below
@@ -220,3 +221,12 @@ The next modifications evaluated involved changing the vector databases. All pri
 
 #
 The most critical metric in this experiment is context recall, as it is responsible for the context retrieved from the database. We can observe that Chroma and Qdrant performed identically, with no differences visible in the results. Poorer performance was obtained when utilizing the FAISS database, where a clear decrease in context recall is observed for both text and images.
+
+
+# 3. Time and cost comaprison
+
+inline_multimodel: 08:23:55 do 8:29:05; liczba tokenow 225k  -> 5 minut i 10 sekund - > 9,12 sekundy na pytanie -> 6618 tokenow na pytanie
+
+to samo ale z rerankerem zamiast filtra:  60/15: 8:33:14 do 8:56:02: 378k - > 22 minuty i 48 sekund -> 40,24 sekundy na pytanie
+
+9:26:15 - 9:30:10 + 214k tokenow - visual_multimodal z 5 zdjeiami -> 3 minuty i 55 sekund -> 6,91 sekundy na pytanie  
