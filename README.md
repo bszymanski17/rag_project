@@ -24,6 +24,11 @@ Additionally, enhancements such as rerankers and the integration of metadata (pa
 
 ```
 .
+├── .byaldi/                        # Local cache for ColPali models
+├── .dockerignore                   
+├── .gitignore                   
+├── .env                            # API keys and environment secrets
+├── Dockerfile                      # Blueprint configuration for the Linux container image
 ├── app.py                          # Streamlit chat interface
 ├── config/
 │   ├── evaluation.yaml             # Evaluation configuration (paths, models)
@@ -33,7 +38,7 @@ Additionally, enhancements such as rerankers and the integration of metadata (pa
 │   │   └── chunk_filtering_threshold_analysis.ipynb         
 │   └── evaluaton/
 │       ├── input/
-            └── RAG_evaluation_dataset.csv # evaluatuion dataset
+│           └── RAG_evaluation_dataset.csv # evaluatuion dataset
 │       └── output/ # evaluaton results         
 ├── prompts/
 │   └── main.yaml                   # LLM prompt templates
@@ -49,7 +54,8 @@ Additionally, enhancements such as rerankers and the integration of metadata (pa
     ├── indexing/
     │   ├── database_orchestrator.py          # Initializes vector DB (routes by chunk approach)
     │   ├── database_initializer.py           # Chroma/Qdrant/FAISS DB creation
-    │   ├── visual_database_initializer.py    # ColPali index creation (visual pipeline)
+    │   ├── visual_database_initializer.py    # Indexes image patches into database
+    │   ├── visual_byaldi_initializer.py      # ColPali index creation (visual pipeline)
     │   ├── element_describer.py              # Multimodal element description via LLM
     │   └── chunk_strategies/
     │       ├── baseline/
@@ -67,13 +73,16 @@ Additionally, enhancements such as rerankers and the integration of metadata (pa
     │   ├── similarity_map.py                 # Source attribution heatmap generation
     │   ├── context_formatter.py              # Formats retrieved chunks for LLM prompt
     │   ├── query_metada_extractor.py         # Extracts page range filters from query
+    │   └── bounding_boxes/
+    │   │   ├── bounding_boxes_generator.py   # Draw bounding boxes (visual_database approach)
+    │   │   └── similarity_map_generator.py   # Generate similarity heatmap (visual_multimodal approach)
     │   └── chunk_filtering/
     │       ├── reranker.py                   # Cross-encoder reranking (BGE)
     │       └── retrieval_filter.py           # Distance threshold filtering
     ├── generation/
     │   ├── answer_orchestrator.py            # Routes generation by chunk approach
     │   ├── answer_generator.py               # Text-based Gemini response generation
-    │   └── answer_generator_visual.py        # Visual Gemini response (base64 images)
+    │   └── answer_generator_visual.py        # Visual Gemini response
     ├── evaluation/
     │   ├── evaluation_pipeline.py            # End-to-end evaluation runner
     │   └── eval_utils.py                     # RAGAS metrics utilities

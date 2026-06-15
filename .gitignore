@@ -5,3 +5,8 @@ __pycache__/
 .byaldi/
 images/
 databases/
+documents/evaluation/results/baseline/
+documents/evaluation/results/multimodal_inline/
+documents/evaluation/results/multimodal_split/
+documents/evaluation/results/visual_database/
+documents/evaluation/results/visual_multimodal/
