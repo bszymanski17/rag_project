@@ -94,23 +94,19 @@ Additionally, enhancements such as rerankers and the integration of metadata (pa
 
 ## Setup & Installation
 
-### 1. Install Dependencies
-
-Install the required dependencies using:
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Configure Environment Variables
+### 1. Configure Environment Variables
 
 Create a `.env` file in the root directory of the project. See the configuration example below.
 
-### 3. Launch the Application
+### 2. Build docker image
+Run the following command to automatically build the Docker image, link local directory volumes for database cache persistence, and start the system.
 
 ```bash
-streamlit run app.py
+docker compose up --build
 ```
+
+### 3. Open application
+Once the startup logs stabilize, open your web browser and navigate to the Streamlit interface at `http://localhost:8501`.
 
 ---
 
